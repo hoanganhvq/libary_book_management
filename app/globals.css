@@ -702,6 +702,78 @@ svg {
   grid-column: 1 / span 3;
 }
 
+.pagination-bar {
+  align-items: center;
+  align-self: stretch;
+  background: white;
+  border: 1px solid rgba(217, 227, 244, 0.75);
+  border-radius: 12px;
+  box-shadow: var(--soft-shadow);
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  padding: 12px 14px 12px 18px;
+}
+
+.pagination-summary {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.pagination-summary strong {
+  color: var(--foreground);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 20px;
+}
+
+.pagination-summary span {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.pagination-actions {
+  align-items: center;
+  display: flex;
+  flex: 0 0 auto;
+  gap: 8px;
+}
+
+.pagination-actions button {
+  align-items: center;
+  background: #f8fbff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--primary);
+  display: inline-flex;
+  gap: 6px;
+  justify-content: center;
+  min-height: 40px;
+  min-width: 108px;
+  padding: 8px 14px;
+  transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
+  white-space: nowrap;
+}
+
+.pagination-actions button:hover:not(:disabled) {
+  background: #eef4ff;
+  border-color: rgba(0, 86, 179, 0.28);
+}
+
+.pagination-actions button:disabled {
+  color: var(--muted-2);
+  cursor: default;
+  opacity: 0.55;
+}
+
+.pagination-actions svg {
+  flex: 0 0 auto;
+  height: 16px;
+  width: 16px;
+}
+
 @keyframes search-spin {
   to {
     transform: rotate(360deg);
@@ -1071,6 +1143,20 @@ svg {
 
   .search-field {
     flex: 1 1 220px;
+  }
+
+  .pagination-bar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .pagination-actions {
+    width: 100%;
+  }
+
+  .pagination-actions button {
+    flex: 1;
+    min-width: 0;
   }
 
   .modal-backdrop {

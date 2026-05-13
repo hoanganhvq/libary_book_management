@@ -11,11 +11,18 @@ import {
   SearchStatus,
   TableMessage,
 } from "@/app/components/LoadingStates";
+import { PaginationControls } from "@/app/components/PaginationControls";
 import { BulkAddBooksModal } from "@/app/components/modals/BulkAddBooksModal";
 import { ConfirmDeleteModal } from "@/app/components/modals/ConfirmDeleteModal";
 import { EditBookModal } from "@/app/components/modals/EditBookModal";
-import type { ApiBook, Book } from "@/app/types/books";
-import { toDisplayBook } from "@/app/utils/book-mappers";
+import type { ApiBook, Book, PaginatedBooksResponse } from "@/app/types/books";
+import { toDisplayBook, toPaginatedBooks } from "@/app/utils/book-mappers";
+
+type LoadBooksOptions = {
+  cursor?: string | null;
+  resetPagination?: boolean;
+  title?: string;
+};
 
 export default function InventoryPage() {
   const [isAddModalOpen, setAddModalOpen] = useState(false);
@@ -26,27 +33,58 @@ export default function InventoryPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setLoading] = useState(true);
   const [apiProblem, setApiProblem] = useState<string | null>(null);
+  const [currentCursor, setCurrentCursor] = useState<string | null>(null);
+  const [cursorHistory, setCursorHistory] = useState<(string | null)[]>([]);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [totalPages, setTotalPages] = useState<number | null>(null);
 
-  async function loadBooks(title = searchTerm) {
+  async function loadBooks({
+    cursor = currentCursor,
+    resetPagination = false,
+    title = searchTerm,
+  }: LoadBooksOptions = {}) {
+    const trimmedTitle = title.trim();
     setLoading(true);
     setApiProblem(null);
 
     try {
-      const url = title.trim()
-        ? `/api/books/search?title=${encodeURIComponent(title.trim())}`
-        : "/api/books";
+      const params = new URLSearchParams();
+      if (!trimmedTitle && cursor) {
+        params.set("cursor", cursor);
+      }
+
+      const url = trimmedTitle
+        ? `/api/books/search?title=${encodeURIComponent(trimmedTitle)}`
+        : `/api/books/pagination${params.size > 0 ? `?${params.toString()}` : ""}`;
       const response = await fetch(url);
 
       if (!response.ok) {
         throw new Error(`API responded with ${response.status}`);
       }
 
-      const data = (await response.json()) as ApiBook[];
-      setApiBooks(Array.isArray(data) ? data : []);
+      const data = (await response.json()) as ApiBook[] | PaginatedBooksResponse;
+      if (trimmedTitle) {
+        setApiBooks(Array.isArray(data) ? data : []);
+        setCurrentCursor(null);
+        setCursorHistory([]);
+        setNextCursor(null);
+        setTotalPages(null);
+      } else {
+        const paginated = toPaginatedBooks(data);
+        setApiBooks(paginated.books);
+        setCurrentCursor(cursor);
+        setNextCursor(paginated.nextCursor);
+        setTotalPages(paginated.totalPages);
+        if (resetPagination) {
+          setCursorHistory([]);
+        }
+      }
       setSelectedIds([]);
     } catch {
       setApiProblem("Placeholder: unable to load books from the backend API.");
       setApiBooks([]);
+      setNextCursor(null);
+      setTotalPages(null);
     } finally {
       setLoading(false);
     }
@@ -54,7 +92,7 @@ export default function InventoryPage() {
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
-      void loadBooks(searchTerm);
+      void loadBooks({ cursor: null, resetPagination: true, title: searchTerm });
     }, 250);
 
     return () => window.clearTimeout(timer);
@@ -69,17 +107,35 @@ export default function InventoryPage() {
   const recentBooks = books.slice(0, 8);
   const allSelected = books.length > 0 && selectedIds.length === books.length;
   const isSearching = isLoading && searchTerm.trim().length > 0;
+  const isSearchMode = searchTerm.trim().length > 0;
   const showLargeLoadingState = isLoading && !isSearching;
+  const pageNumber = cursorHistory.length + 1;
 
   function handleCreated() {
     setSearchTerm("");
     setAddModalOpen(false);
-    void loadBooks("");
+    void loadBooks({ cursor: null, resetPagination: true, title: "" });
   }
 
   function handleUpdated() {
     setEditingBook(null);
     void loadBooks();
+  }
+
+  function handleNextPage() {
+    if (!nextCursor) {
+      return;
+    }
+
+    setCursorHistory((current) => [...current, currentCursor]);
+    void loadBooks({ cursor: nextCursor, title: "" });
+  }
+
+  function handlePreviousPage() {
+    const previousCursor = cursorHistory.at(-1) ?? null;
+
+    setCursorHistory((current) => current.slice(0, -1));
+    void loadBooks({ cursor: previousCursor, title: "" });
   }
 
   function toggleSelected(id: number) {
@@ -227,6 +283,18 @@ export default function InventoryPage() {
               />
             ))}
           </div>
+          {!isSearchMode && (
+            <PaginationControls
+              canGoNext={Boolean(nextCursor)}
+              canGoPrevious={cursorHistory.length > 0}
+              itemCount={books.length}
+              isLoading={isLoading}
+              onNext={handleNextPage}
+              onPrevious={handlePreviousPage}
+              page={pageNumber}
+              totalPages={totalPages}
+            />
+          )}
         </section>
       </section>
 

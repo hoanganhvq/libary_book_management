@@ -25,7 +25,7 @@ export function BookTableRow({
         <Icon name="book" />
         <span>
           <strong>{book.title}</strong>
-          <small>{book.isbn}</small>
+          {book.isbn && <small>{book.isbn}</small>}
         </span>
       </div>
       <span>{book.author}</span>
@@ -34,6 +34,7 @@ export function BookTableRow({
         <i />
         In Stock
       </span>
+      {/* <span>Placeholder: location unavailable</span> */}
       <span className="table-actions">
         <button className="table-action" onClick={onEdit} type="button">
           Modify

@@ -16,6 +16,8 @@ type IconName =
   | "book"
   | "briefcase"
   | "chart"
+  | "chevronLeft"
+  | "chevronRight"
   | "close"
   | "grid"
   | "help"
@@ -32,6 +34,8 @@ const paths = {
   book: "M6 4h9a3 3 0 0 1 3 3v13H8a2 2 0 0 1-2-2V4Zm2 0v14",
   briefcase: "M5 8h14v10H5V8Zm4 0V6h6v2",
   chart: "M5 19V5M9 19v-7M13 19V9M17 19V7M3 19h18",
+  chevronLeft: "m15 18-6-6 6-6",
+  chevronRight: "m9 18 6-6-6-6",
   close: "M6 6l12 12M18 6 6 18",
   grid: "M5 5h6v6H5V5Zm8 0h6v6h-6V5ZM5 13h6v6H5v-6Zm8 0h6v6h-6v-6Z",
   help: "M12 19h.01M9.5 9a2.5 2.5 0 1 1 4.1 1.9c-.9.7-1.6 1.2-1.6 2.6M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z",
