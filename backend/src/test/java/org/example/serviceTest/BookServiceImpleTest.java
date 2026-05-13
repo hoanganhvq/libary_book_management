@@ -4,7 +4,6 @@ import org.example.DTO.BookDTOResponse;
 import org.example.Entity.Book;
 import org.example.Exception.ResourceNotFoundException;
 import org.example.Mapper.BookMapper;
-import org.example.Mapper.BookMapperImpl;
 import org.example.Repository.BookRepository;
 import org.example.Service.BookService;
 import org.example.Service.BookServiceImpl;
@@ -26,10 +25,10 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class BookServiceImpleTest {
 
-    @Mock
+    @Mock //Just create virtual object
     private BookRepository bookRepository;
 
-    @InjectMocks
+    @InjectMocks //Init blockservice and auto inject @mock annotation into object
     private BookServiceImpl bookService;
     @Mock
     private BookMapper  bookMapper;
@@ -46,16 +45,15 @@ public class BookServiceImpleTest {
                 new BookDTOResponse(2L, "The Habbit", "Tolkien", "Fiction" ,true)
         );
 
-        Mockito.when(bookRepository.findAll()).thenReturn(mockBooks);
-
+        Mockito.when(bookRepository.findAll()).thenReturn(mockBooks); // when findAll is called, then they should be return mockBooks
         when(bookMapper.toResponseList(anyList()))
-                .thenReturn(mockResponses);
-        List<BookDTOResponse> result = bookService.getBooks();
+                .thenReturn(mockResponses); //When transfer any List, they shoudd be return mockResponse
 
+        List<BookDTOResponse> result = bookService.getBooks();
         assertThat(result.size()).isEqualTo(2);
         assertThat(result.get(0).getTitle()).isEqualTo("Clean code");
         assertThat(result.get(1).getTitle()).isEqualTo("The Habbit");
-        verify(bookRepository, times(1)).findAll();
+        verify(bookRepository, times(1)).findAll(); //Verify method just run 1 time
     }
 
     @Test

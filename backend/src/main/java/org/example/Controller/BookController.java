@@ -3,6 +3,7 @@ package org.example.Controller;
 import jakarta.validation.Valid;
 import org.example.DTO.BookDTO;
 import org.example.DTO.BookDTOResponse;
+import org.example.Entity.Cursor;
 import org.example.Service.BookService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -25,6 +26,14 @@ public class BookController {
         return ResponseEntity.ok(result);
     }
 
+    @GetMapping("/pagination")
+    public ResponseEntity<Cursor<BookDTOResponse>> findAllWithPagination(
+        @RequestParam(required = false) String cursor,
+        @RequestParam(defaultValue = "10") int size
+    ){
+        Cursor<BookDTOResponse> result = bookService.getBooksCursor(cursor, size);
+        return ResponseEntity.ok(result);
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<BookDTOResponse> findById(@PathVariable Long id) {
@@ -37,8 +46,6 @@ public class BookController {
         List<BookDTOResponse> result = bookService.getBooksByTitle(title);
         return ResponseEntity.ok(result);
     }
-
-
 
     @PostMapping
     public ResponseEntity<BookDTOResponse> addBook(
