@@ -212,7 +212,19 @@ svg {
   gap: 8px;
   height: 40px;
   padding: 0 16px;
+  position: relative;
+  transition: background 180ms ease, box-shadow 180ms ease, transform 180ms ease;
   width: 256px;
+}
+
+.search-field:focus-within,
+.search-field.searching {
+  background: white;
+  box-shadow: 0 10px 24px rgba(0, 63, 135, 0.1), 0 0 0 3px rgba(0, 86, 179, 0.1);
+}
+
+.search-field.searching {
+  transform: translateY(-1px);
 }
 
 .search-field svg {
@@ -233,6 +245,28 @@ svg {
   color: #6b7280;
 }
 
+.search-activity {
+  align-items: center;
+  color: var(--primary);
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: 11px;
+  font-weight: 700;
+  gap: 6px;
+  letter-spacing: 0.4px;
+  line-height: 16px;
+  text-transform: uppercase;
+}
+
+.search-activity span {
+  animation: search-spin 850ms linear infinite;
+  border: 2px solid rgba(0, 86, 179, 0.2);
+  border-radius: 999px;
+  border-top-color: var(--primary-bright);
+  height: 14px;
+  width: 14px;
+}
+
 .inventory-columns {
   display: grid;
   gap: 24px;
@@ -243,10 +277,31 @@ svg {
 }
 
 .status-column {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
   gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  align-items: stretch;
   min-width: 0;
+}
+
+.results-surface {
+  position: relative;
+}
+
+.results-surface::after {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.66), transparent);
+  content: "";
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  transform: translateX(-100%);
+  transition: opacity 180ms ease;
+}
+
+.loading .results-surface::after {
+  animation: surface-sheen 1.2s ease-in-out infinite;
+  opacity: 1;
 }
 
 .column-label {
@@ -259,7 +314,7 @@ svg {
   letter-spacing: 0.55px;
   line-height: 16.5px;
   text-transform: uppercase;
-  width: 100%;
+  grid-column: 1 / -1;
 }
 
 .column-label span {
@@ -274,26 +329,33 @@ svg {
 }
 
 .book-card {
+  animation: result-enter 240ms ease both;
   background: white;
   border-radius: 12px;
   box-shadow: var(--soft-shadow);
   display: flex;
-  flex: 1 1 320px;
   flex-direction: column;
   gap: 24px;
-  max-width: 420px;
+  height: 100%;
   min-width: 0;
   padding: 24px;
+  transition: box-shadow 180ms ease, transform 180ms ease;
+}
+
+.book-card:hover {
+  box-shadow: 0 14px 28px rgba(0, 63, 135, 0.1);
+  transform: translateY(-2px);
 }
 
 .placeholder-card {
   align-items: center;
+  animation: result-enter 220ms ease both;
   background: rgba(255, 255, 255, 0.72);
   border: 1px dashed var(--line-strong);
   border-radius: 12px;
   color: var(--muted);
   display: flex;
-  flex: 1 1 320px;
+  grid-column: 1 / -1;
   min-height: 128px;
   padding: 24px;
 }
@@ -313,7 +375,12 @@ svg {
 
 .book-identity {
   display: flex;
+  flex: 1 1 auto;
   gap: 16px;
+  min-width: 0;
+}
+
+.book-identity > div:last-child {
   min-width: 0;
 }
 
@@ -365,6 +432,7 @@ svg {
   font-weight: 400;
   line-height: 20px;
   margin: 0;
+  overflow-wrap: anywhere;
 }
 
 .book-card p {
@@ -408,6 +476,7 @@ svg {
   gap: 16px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   margin: 0;
+  margin-top: auto;
   padding-top: 17px;
 }
 
@@ -443,6 +512,13 @@ svg {
   justify-content: space-between;
 }
 
+.section-title {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  min-width: 0;
+}
+
 .section-heading h3 {
   color: var(--primary);
   font-family: var(--font-serif-display);
@@ -450,6 +526,21 @@ svg {
   font-weight: 400;
   line-height: 24px;
   margin: 0;
+}
+
+.search-status {
+  align-items: center;
+  background: #eef4ff;
+  border: 1px solid rgba(0, 86, 179, 0.14);
+  border-radius: 999px;
+  color: var(--primary);
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 16px;
+  padding: 4px 10px;
+  text-transform: uppercase;
 }
 
 .section-heading button {
@@ -490,7 +581,7 @@ svg {
 .shipment-row {
   align-items: center;
   display: grid;
-  grid-template-columns: 56px minmax(240px, 1.45fr) minmax(140px, 0.8fr) minmax(120px, 0.75fr) minmax(120px, 0.65fr) minmax(150px, 0.85fr) minmax(168px, 0.75fr);
+  grid-template-columns: 56px minmax(240px, 1.45fr) minmax(140px, 0.8fr) minmax(120px, 0.75fr) minmax(120px, 0.65fr) minmax(168px, 0.75fr);
 }
 
 .shipment-row > * {
@@ -507,7 +598,13 @@ svg {
 }
 
 .shipment-row:not(.shipment-head) {
+  animation: result-enter 220ms ease both;
   border-top: 1px solid rgba(217, 227, 244, 0.5);
+  transition: background 160ms ease, transform 160ms ease;
+}
+
+.shipment-row:not(.shipment-head):hover {
+  background: #f8fbff;
 }
 
 .book-detail {
@@ -603,6 +700,44 @@ svg {
 
 .table-message span:first-child {
   grid-column: 1 / span 3;
+}
+
+@keyframes search-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes surface-sheen {
+  0% {
+    transform: translateX(-100%);
+  }
+  55%,
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes result-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 1ms !important;
+  }
 }
 
 .modal-backdrop {
@@ -910,7 +1045,7 @@ svg {
   }
 
   .shipment-row {
-    min-width: 1160px;
+    min-width: 980px;
   }
 }
 

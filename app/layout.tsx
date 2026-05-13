@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Lumina Inventory",
+  title: "Mock Project Book Inventory",
   description: "Library inventory management dashboard",
 };
 
